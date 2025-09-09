@@ -11,7 +11,7 @@ class SimpleAuth {
         this.sessionKey = 'ricco_authenticated';
         this.sessionDuration = authConfig.sessionDuration;
     }
-
+ 
     // Check if user is already logged in
     isAuthenticated() {
         const auth = localStorage.getItem(this.sessionKey);

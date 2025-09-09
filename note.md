@@ -37,6 +37,10 @@ Now, what i actualy want to do for him:
 I want a simple tool, where he will be adding new trips. and all data gets auto done, like analytic, monthly yearly data. total income, profit, drive cost, maintaince cost etc. 
 
 
+
+git remote add origin https://github.com/hellomj007/ricco-ride-tool.git
+
+ 
 ---
 I am not a developer. Please tell me how can we do this? 
 and do we need database? if yes, how could we do for now as initial start? we can then might have database but how to start without it? 
