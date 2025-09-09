@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiccoRide - Manage Data</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 RiccoRide - Manage Data</h1>
+            <nav>
+                <a href="index.html">Dashboard</a>
+                <a href="trip-entry.html">Add Trip</a>
+                <a href="trips-list.html">Manage Trips</a>
+                <a href="manage-data.html" class="active">Manage Data</a>
+                <a href="reports.html">Reports</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('vehicles')">Vehicles</button>
+                    <button class="tab" onclick="showTab('drivers')">Drivers</button>
+                    <button class="tab" onclick="showTab('companies')">Companies</button>
+                    <button class="tab" onclick="showTab('vendors')">Vendors</button>
+                </div>
+
+                <!-- Vehicles Tab -->
+                <div id="vehicles" class="tab-content active">
+                    <h2>Manage Vehicles</h2>
+                    <form id="vehicleForm" class="form-grid">
+                        <div class="form-group">
+                            <label for="vehicleName">Vehicle Name *</label>
+                            <input type="text" id="vehicleName" required placeholder="e.g., Maruti Swift, Honda City">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicleNumber">Vehicle Number *</label>
+                            <input type="text" id="vehicleNumber" required placeholder="e.g., MH12AB1234">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicleType">Vehicle Type *</label>
+                            <select id="vehicleType" required>
+                                <option value="">Select Type</option>
+                                <option value="Sedan">Sedan</option>
+                                <option value="SUV">SUV</option>
+                                <option value="Hatchback">Hatchback</option>
+                                <option value="Tempo Traveller">Tempo Traveller</option>
+                                <option value="Bus">Bus</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicleOwner">Owner Type *</label>
+                            <select id="vehicleOwner" required>
+                                <option value="">Select Owner</option>
+                                <option value="Own">Own Vehicle</option>
+                                <option value="Partner">Partner Vehicle</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicleStatus">Status *</label>
+                            <select id="vehicleStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Maintenance">Under Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Add Vehicle</button>
+                            <button type="button" class="btn btn-secondary" onclick="clearVehicleForm()">Clear</button>
+                        </div>
+                    </form>
+
+                    <div class="table-container">
+                        <table id="vehiclesTable">
+                            <thead>
+                                <tr>
+                                    <th>Vehicle Name</th>
+                                    <th>Vehicle Number</th>
+                                    <th>Type</th>
+                                    <th>Owner</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Drivers Tab -->
+                <div id="drivers" class="tab-content">
+                    <h2>Manage Drivers</h2>
+                    <form id="driverForm" class="form-grid">
+                        <div class="form-group">
+                            <label for="driverName">Driver Name *</label>
+                            <input type="text" id="driverName" required placeholder="Enter driver name">
+                        </div>
+                        <div class="form-group">
+                            <label for="driverPhone">Phone Number *</label>
+                            <input type="tel" id="driverPhone" required placeholder="9876543210">
+                        </div>
+                        <div class="form-group">
+                            <label for="driverStatus">Status *</label>
+                            <select id="driverStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="On Leave">On Leave</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Add Driver</button>
+                            <button type="button" class="btn btn-secondary" onclick="clearDriverForm()">Clear</button>
+                        </div>
+                    </form>
+
+                    <div class="table-container">
+                        <table id="driversTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Companies Tab -->
+                <div id="companies" class="tab-content">
+                    <h2>Manage Companies</h2>
+                    <form id="companyForm" class="form-grid">
+                        <div class="form-group">
+                            <label for="companyName">Company Name *</label>
+                            <input type="text" id="companyName" required placeholder="Enter company name">
+                        </div>
+                        <div class="form-group">
+                            <label for="companyContact">Contact Person *</label>
+                            <input type="text" id="companyContact" required placeholder="Contact person name">
+                        </div>
+                        <div class="form-group">
+                            <label for="companyPhone">Phone Number *</label>
+                            <input type="tel" id="companyPhone" required placeholder="9876543210">
+                        </div>
+                        <div class="form-group">
+                            <label for="companyEmail">Email</label>
+                            <input type="email" id="companyEmail" placeholder="company@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="companyAddress">Address</label>
+                            <textarea id="companyAddress" rows="3" placeholder="Enter company address"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="companyStatus">Status *</label>
+                            <select id="companyStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Add Company</button>
+                            <button type="button" class="btn btn-secondary" onclick="clearCompanyForm()">Clear</button>
+                        </div>
+                    </form>
+
+                    <div class="table-container">
+                        <table id="companiesTable">
+                            <thead>
+                                <tr>
+                                    <th>Company Name</th>
+                                    <th>Contact Person</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Vendors Tab -->
+                <div id="vendors" class="tab-content">
+                    <h2>Manage Vendors</h2>
+                    <form id="vendorForm" class="form-grid">
+                        <div class="form-group">
+                            <label for="vendorName">Vendor Name *</label>
+                            <input type="text" id="vendorName" required placeholder="Enter vendor name">
+                        </div>
+                        <div class="form-group">
+                            <label for="vendorContact">Contact Person *</label>
+                            <input type="text" id="vendorContact" required placeholder="Contact person name">
+                        </div>
+                        <div class="form-group">
+                            <label for="vendorPhone">Phone Number *</label>
+                            <input type="tel" id="vendorPhone" required placeholder="9876543210">
+                        </div>
+                        <div class="form-group">
+                            <label for="vendorCommission">Commission % *</label>
+                            <input type="number" id="vendorCommission" required placeholder="15" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="vendorStatus">Status *</label>
+                            <select id="vendorStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Add Vendor</button>
+                            <button type="button" class="btn btn-secondary" onclick="clearVendorForm()">Clear</button>
+                        </div>
+                    </form>
+
+                    <div class="table-container">
+                        <table id="vendorsTable">
+                            <thead>
+                                <tr>
+                                    <th>Vendor Name</th>
+                                    <th>Contact Person</th>
+                                    <th>Phone</th>
+                                    <th>Commission %</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Edit Item</h2>
+            <form id="editForm"></form>
+        </div>
+    </div>
+
+    <!-- Configuration (loads first) -->
+    <script src="js/config.js"></script>
+    
+    <!-- Authentication -->
+    <script src="js/auth.js"></script>
+    
+    <!-- Supabase Database (pure database only) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/database.js"></script>
+    <script src="js/storage-database.js"></script>
+    
+    <script src="js/manage-data.js"></script>
+</body>
+</html>

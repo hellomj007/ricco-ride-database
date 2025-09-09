@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiccoRide - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 RiccoRide Dashboard</h1>
+            <nav>
+                <a href="index.html" class="active">Dashboard</a>
+                <a href="trip-entry.html">Add Trip</a>
+                <a href="trips-list.html">Manage Trips</a>
+                <a href="manage-data.html">Manage Data</a>
+                <a href="reports.html">Reports</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Today's Trips</h3>
+                    <div class="stat-value" id="todaysTrips">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>This Month Revenue</h3>
+                    <div class="stat-value" id="monthRevenue">₹0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>This Month Profit</h3>
+                    <div class="stat-value" id="monthProfit">₹0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Vehicles</h3>
+                    <div class="stat-value" id="activeVehicles">0</div>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="recent-trips">
+                    <h2>Recent Trips</h2>
+                    <div class="trips-list" id="recentTripsList">
+                        <p>No trips recorded yet. <a href="trip-entry.html">Add your first trip</a></p>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h2>Quick Actions</h2>
+                    <div class="action-buttons">
+                        <a href="trip-entry.html" class="btn btn-primary">Add New Trip</a>
+                        <a href="manage-data.html" class="btn btn-secondary">Add Vehicle</a>
+                        <a href="manage-data.html" class="btn btn-secondary">Add Driver</a>
+                        <a href="reports.html" class="btn btn-info">View Reports</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Trip Details Modal -->
+    <div id="tripModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" onclick="closeTripModal()">&times;</span>
+            <h2>Trip Details</h2>
+            <div id="tripDetails"></div>
+        </div>
+    </div>
+
+    <!-- Configuration (loads first) -->
+    <script src="js/config.js"></script>
+    
+    <!-- Authentication -->
+    <script src="js/auth.js"></script>
+    
+    <!-- Supabase Database -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/database.js"></script>
+    <script src="js/storage-database.js"></script>
+    
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

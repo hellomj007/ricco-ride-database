@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiccoRide - Reports & Analytics</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 RiccoRide - Reports & Analytics</h1>
+            <nav>
+                <a href="index.html">Dashboard</a>
+                <a href="trip-entry.html">Add Trip</a>
+                <a href="trips-list.html">Manage Trips</a>
+                <a href="manage-data.html">Manage Data</a>
+                <a href="reports.html" class="active">Reports</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Filters -->
+            <div class="form-container">
+                <h2>Report Filters</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="dateRangePreset">Quick Date Range</label>
+                        <select id="dateRangePreset" onchange="applyDateRangePreset()">
+                            <option value="">Custom Range</option>
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="thisMonth">This Month</option>
+                            <option value="lastMonth">Last Month</option>
+                            <option value="thisYear">This Year</option>
+                            <option value="lastYear">Last Year</option>
+                            <option value="allTime">All Time</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterStartDate">Start Date</label>
+                        <input type="date" id="filterStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterEndDate">End Date</label>
+                        <input type="date" id="filterEndDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterTripType">Trip Type</label>
+                        <select id="filterTripType">
+                            <option value="">All Types</option>
+                            <option value="Company">Company</option>
+                            <option value="Individual">RiccoRide</option>
+                            <option value="Outsource">Outsource</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterVehicle">Vehicle</label>
+                        <select id="filterVehicle">
+                            <option value="">All Vehicles</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                        <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="stats-grid" id="reportStats">
+                <div class="stat-card">
+                    <h3>Total Trips</h3>
+                    <div class="stat-value" id="totalTrips">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Revenue</h3>
+                    <div class="stat-value" id="totalRevenue">₹0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Profit</h3>
+                    <div class="stat-value" id="totalProfit">₹0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Distance</h3>
+                    <div class="stat-value" id="totalDistance">0 KM</div>
+                </div>
+            </div>
+
+            <!-- Reports Tabs -->
+            <div class="form-container">
+                <div class="tabs">
+                    <button class="tab active" onclick="showReportTab('summary')">Summary Report</button>
+                    <button class="tab" onclick="showReportTab('monthly')">Monthly Analysis</button>
+                    <button class="tab" onclick="showReportTab('vehicle')">Vehicle Performance</button>
+                    <button class="tab" onclick="showReportTab('company')">Company Analysis</button>
+                    <button class="tab" onclick="showReportTab('detailed')">Detailed Trips</button>
+                </div>
+
+                <!-- Summary Report -->
+                <div id="summary" class="tab-content active">
+                    <h2>Summary Report</h2>
+                    <div class="report-section">
+                        <h3>Financial Summary</h3>
+                        <div class="form-grid">
+                            <div class="stat-item">
+                                <label>Total Revenue:</label>
+                                <span id="summaryRevenue">₹0</span>
+                            </div>
+                            <div class="stat-item">
+                                <label>Driver Costs:</label>
+                                <span id="summaryDriverCosts">₹0</span>
+                            </div>
+                            <div class="stat-item">
+                                <label>Fuel Costs:</label>
+                                <span id="summaryFuelCosts">₹0</span>
+                            </div>
+                            <div class="stat-item">
+                                <label>Maintenance Costs:</label>
+                                <span id="summaryMaintenanceCosts">₹0</span>
+                            </div>
+                            <div class="stat-item">
+                                <label>Toll & Parking:</label>
+                                <span id="summaryTollParking">₹0</span>
+                            </div>
+                            <div class="stat-item">
+                                <label><strong>Net Profit:</strong></label>
+                                <span id="summaryNetProfit">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-section">
+                        <h3>Trip Type Breakdown</h3>
+                        <div id="tripTypeBreakdown"></div>
+                    </div>
+                </div>
+
+                <!-- Monthly Analysis -->
+                <div id="monthly" class="tab-content">
+                    <h2>Monthly Analysis</h2>
+                    <div class="form-group">
+                        <label for="monthlyYear">Select Year:</label>
+                        <select id="monthlyYear" onchange="loadMonthlyAnalysis()">
+                        </select>
+                    </div>
+                    <div id="monthlyChart"></div>
+                </div>
+
+                <!-- Vehicle Performance -->
+                <div id="vehicle" class="tab-content">
+                    <h2>Vehicle Performance</h2>
+                    <div id="vehiclePerformance"></div>
+                </div>
+
+                <!-- Company Analysis -->
+                <div id="company" class="tab-content">
+                    <h2>Company Analysis</h2>
+                    <div id="companyAnalysis"></div>
+                </div>
+
+                <!-- Detailed Trips -->
+                <div id="detailed" class="tab-content">
+                    <h2>Detailed Trips Report</h2>
+                    <div class="form-group">
+                        <button class="btn btn-info" onclick="exportTripsToCSV()">Export to CSV</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="detailedTripsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Route</th>
+                                    <th>Vehicle</th>
+                                    <th>Driver</th>
+                                    <th>Company/Client</th>
+                                    <th>Distance (KM)</th>
+                                    <th>Revenue (₹)</th>
+                                    <th>Costs (₹)</th>
+                                    <th>Profit (₹)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Trip Details Modal -->
+    <div id="tripModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" onclick="closeTripModal()">&times;</span>
+            <h2>Trip Details</h2>
+            <div id="tripDetails"></div>
+        </div>
+    </div>
+
+    <!-- Configuration (loads first) -->
+    <script src="js/config.js"></script>
+    
+    <!-- Authentication -->
+    <script src="js/auth.js"></script>
+    
+    <!-- Supabase Database (pure database only) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/database.js"></script>
+    <script src="js/storage-database.js"></script>
+    
+    <script src="js/reports.js"></script>
+</body>
+</html>
