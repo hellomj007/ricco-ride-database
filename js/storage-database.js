@@ -1,6 +1,9 @@
 // Database-Only Storage - No localStorage, pure Supabase
-// Use the supabase client from database.js to avoid conflicts
-const supabase = window.supabase.createClient(ENV.getSupabaseConfig().url, ENV.getSupabaseConfig().key);
+// Direct Supabase configuration (simpler approach)
+const SUPABASE_URL = 'https://fvjrckdblidfrjgfihnw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2anJja2RibGlkZnJqZ2ZpaG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0MjI4MTIsImV4cCI6MjA3Mjk5ODgxMn0.uO9ujXUf_2RPPhQ-ncM8uHiJarE8w_lrct2s4E7UW1E';
+
+let supabase;
 
 class DatabaseStorage {
     constructor() {
@@ -10,6 +13,24 @@ class DatabaseStorage {
 
     async initializeDatabase() {
         try {
+            // Wait for Supabase library to be available
+            let retries = 0;
+            while (!window.supabase && retries < 50) {
+                console.log('⏳ Waiting for Supabase library...');
+                await new Promise(resolve => setTimeout(resolve, 100));
+                retries++;
+            }
+            
+            if (!window.supabase) {
+                throw new Error('Supabase library not available after waiting');
+            }
+            
+            // Initialize Supabase client
+            if (!supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase client initialized with direct config');
+            }
+            
             // Test connection
             const { data, error } = await supabase.from('trips').select('count', { count: 'exact', head: true });
             if (error) throw error;
@@ -408,9 +429,12 @@ class DatabaseStorage {
 }
 
 // Create global storage instance (replaces everything)
+console.log('🔧 Creating DatabaseStorage instance...');
 const databaseStorage = new DatabaseStorage();
+console.log('🔧 DatabaseStorage created:', databaseStorage);
 
 // Wrapper to make old synchronous code work with async database
+console.log('🔧 Creating storage wrapper...');
 const storage = {
     // Expose isReady property
     get isReady() {

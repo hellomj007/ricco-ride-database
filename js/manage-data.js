@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Try to load immediately if database is already ready
     setTimeout(() => {
-        if (window.storage && window.storage.isReady) {
+        if (typeof storage !== 'undefined' && storage.isReady) {
             console.log('💡 Database already ready, loading tables immediately');
             loadAllTables();
         } else {
