@@ -6,19 +6,43 @@ let drivers = [];
 let vendors = [];
 let editingTripId = null;
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadData();
+// Set up database ready listener BEFORE DOMContentLoaded
+window.addEventListener('databaseReady', async function() {
+    console.log('🔄 Database ready, loading trips data...');
+    await loadData();
     setupFilters();
-    loadTripsTable();
-    setupEditForm();
+    await loadTripsTable();
 });
 
-function loadData() {
-    allTrips = storage.getTrips();
-    vehicles = storage.getAll('vehicles');
-    companies = storage.getAll('companies');
-    drivers = storage.getAll('drivers');
-    vendors = storage.getAll('vendors');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM loaded, setting up trips-list...');
+    setupEditForm();
+    
+    // Try to load immediately if database is already ready
+    setTimeout(async () => {
+        if (typeof storage !== 'undefined' && storage.isReady) {
+            console.log('💡 Database already ready, loading data immediately');
+            await loadData();
+            setupFilters();
+            await loadTripsTable();
+        } else {
+            console.log('⏳ Database not ready yet, waiting for databaseReady event...');
+        }
+    }, 200);
+});
+
+async function loadData() {
+    try {
+        console.log('📋 Loading trips and related data...');
+        allTrips = await storage.getTrips();
+        vehicles = await storage.getAllAsync('vehicles');
+        companies = await storage.getAllAsync('companies');
+        drivers = await storage.getAllAsync('drivers');
+        vendors = await storage.getAllAsync('vendors');
+        console.log('✅ All data loaded successfully');
+    } catch (error) {
+        console.error('❌ Error loading data:', error);
+    }
 }
 
 function setupFilters() {
@@ -153,7 +177,7 @@ function getFilteredTrips() {
     return filteredTrips.sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
-function loadTripsTable() {
+async function loadTripsTable() {
     const trips = getFilteredTrips();
     const tbody = document.querySelector('#tripsTable tbody');
     
