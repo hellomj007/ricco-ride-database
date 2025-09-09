@@ -753,16 +753,17 @@ async function saveQuickDriver() {
     }
 }
 
-function viewTrip(tripId) {
-    const trip = storage.getById('trips', tripId);
-    if (!trip) {
-        showAlert('Trip not found!', 'error');
-        return;
-    }
+async function viewTrip(tripId) {
+    try {
+        const trip = await storage.getByIdAsync('trips', tripId);
+        if (!trip) {
+            showAlert('Trip not found!', 'error');
+            return;
+        }
 
-    const vehicles = storage.getAll('vehicles');
-    const companies = storage.getAll('companies');
-    const drivers = storage.getAll('drivers');
+        const vehicles = await storage.getAllAsync('vehicles');
+        const companies = await storage.getAllAsync('companies');
+        const drivers = await storage.getAllAsync('drivers');
 
     const vehicle = trip.vehicleId ? 
         vehicles.find(v => v.id === trip.vehicleId) :
@@ -858,9 +859,13 @@ function viewTrip(tripId) {
     }
 
     document.getElementById('tripDetails').innerHTML = detailsHtml;
-    const modal = document.getElementById('tripModal');
-    modal.style.display = 'flex';
-    modal.classList.add('show');
+        const modal = document.getElementById('tripModal');
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } catch (error) {
+        console.error('Error viewing trip:', error);
+        showAlert('Error loading trip details: ' + error.message, 'error');
+    }
 }
 
 function closeTripModal() {

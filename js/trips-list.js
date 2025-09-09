@@ -74,9 +74,9 @@ function setupEditForm() {
     setupEditVendors();
 
     // Setup form submission
-    document.getElementById('editTripForm').addEventListener('submit', function(e) {
+    document.getElementById('editTripForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        updateTrip();
+        await updateTrip();
     });
 }
 
@@ -243,12 +243,13 @@ async function loadTripsTable() {
     }).join('');
 }
 
-function viewTrip(tripId) {
-    const trip = storage.getById('trips', tripId);
-    if (!trip) {
-        showAlert('Trip not found!', 'error');
-        return;
-    }
+async function viewTrip(tripId) {
+    try {
+        const trip = await storage.getByIdAsync('trips', tripId);
+        if (!trip) {
+            showAlert('Trip not found!', 'error');
+            return;
+        }
 
     const vehicle = trip.vehicleId ? 
         vehicles.find(v => v.id === trip.vehicleId) :
@@ -346,10 +347,14 @@ function viewTrip(tripId) {
         `;
     }
 
-    document.getElementById('tripDetails').innerHTML = detailsHtml;
-    const modal = document.getElementById('viewTripModal');
-    modal.style.display = 'flex';
-    modal.classList.add('show');
+        document.getElementById('tripDetails').innerHTML = detailsHtml;
+        const modal = document.getElementById('viewTripModal');
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } catch (error) {
+        console.error('Error viewing trip:', error);
+        showAlert('Error loading trip details: ' + error.message, 'error');
+    }
 }
 
 function closeViewModal() {
@@ -358,12 +363,13 @@ function closeViewModal() {
     modal.classList.remove('show');
 }
 
-function editTrip(tripId) {
-    const trip = storage.getById('trips', tripId);
-    if (!trip) {
-        showAlert('Trip not found!', 'error');
-        return;
-    }
+async function editTrip(tripId) {
+    try {
+        const trip = await storage.getByIdAsync('trips', tripId);
+        if (!trip) {
+            showAlert('Trip not found!', 'error');
+            return;
+        }
 
     editingTripId = tripId;
     
@@ -409,10 +415,14 @@ function editTrip(tripId) {
         document.getElementById('editVendorId').value = trip.vendorId || '';
     }
 
-    // Show modal
-    const modal = document.getElementById('editTripModal');
-    modal.style.display = 'flex';
-    modal.classList.add('show');
+        // Show modal
+        const modal = document.getElementById('editTripModal');
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } catch (error) {
+        console.error('Error editing trip:', error);
+        showAlert('Error loading trip for editing: ' + error.message, 'error');
+    }
 }
 
 function handleEditTripTypeChange() {
@@ -470,7 +480,7 @@ function calculateEditTotalDays() {
     }
 }
 
-function updateTrip() {
+async function updateTrip() {
     if (!editingTripId) return;
 
     const tripData = {
@@ -516,34 +526,65 @@ function updateTrip() {
     }
 
     try {
-        storage.update('trips', editingTripId, tripData);
+        console.log('🔄 Updating trip:', tripData);
+        
+        // Convert to database format (camelCase to snake_case)
+        const dbTripData = {
+            id: editingTripId,
+            date: tripData.date,
+            trip_type: tripData.tripType,
+            route: tripData.route,
+            route_type: tripData.routeType,
+            kilometre: tripData.kilometre,
+            fuel_cost: tripData.fuelCost,
+            payment_method: tripData.paymentMethod,
+            payment: tripData.payment,
+            driver_cost: tripData.driverCost,
+            maintenance: tripData.maintenance,
+            maintenance_reason: tripData.maintenanceReason,
+            description: tripData.description,
+            vehicle_id: tripData.vehicleId,
+            vehicle_details: tripData.vehicleDetails,
+            driver_id: tripData.driverId,
+            company_id: tripData.companyId,
+            toll_parking: tripData.tollParking,
+            start_date_time: tripData.startDateTime,
+            end_date_time: tripData.endDateTime,
+            total_days: tripData.totalDays,
+            vendor_id: tripData.vendorId
+        };
+        
+        await storage.update('trips', editingTripId, dbTripData);
         showAlert('Trip updated successfully!', 'success');
         closeTripModal();
-        loadData();
-        loadTripsTable();
+        await loadData();
+        await loadTripsTable();
     } catch (error) {
+        console.error('Error updating trip:', error);
         showAlert('Error updating trip: ' + error.message, 'error');
     }
 }
 
-function deleteTrip(tripId) {
-    const trip = storage.getById('trips', tripId);
-    if (!trip) {
-        showAlert('Trip not found!', 'error');
-        return;
-    }
-
-    const confirmMessage = `Are you sure you want to delete this trip?\n\nRoute: ${trip.route}\nDate: ${new Date(trip.date).toLocaleDateString('en-IN')}\nPayment: ₹${trip.payment || 0}`;
-    
-    if (confirm(confirmMessage)) {
-        try {
-            storage.delete('trips', tripId);
-            showAlert('Trip deleted successfully!', 'success');
-            loadData();
-            loadTripsTable();
-        } catch (error) {
-            showAlert('Error deleting trip: ' + error.message, 'error');
+async function deleteTrip(tripId) {
+    try {
+        const trip = await storage.getByIdAsync('trips', tripId);
+        if (!trip) {
+            showAlert('Trip not found!', 'error');
+            return;
         }
+
+        const confirmMessage = `Are you sure you want to delete this trip?\n\nRoute: ${trip.route}\nDate: ${new Date(trip.date).toLocaleDateString('en-IN')}\nPayment: ₹${trip.payment || 0}`;
+        
+        if (confirm(confirmMessage)) {
+            console.log('🗑️ Deleting trip:', tripId);
+            await storage.delete('trips', tripId);
+            showAlert('Trip deleted successfully!', 'success');
+            await loadData();
+            await loadTripsTable();
+        }
+    } catch (error) {
+        console.error('Error deleting trip:', error);
+        showAlert('Error deleting trip: ' + error.message, 'error');
     }
 }
 

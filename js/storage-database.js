@@ -336,12 +336,16 @@ class DatabaseStorage {
 
     async getMonthlyRevenue(year, month) {
         const trips = await this.getMonthlyTrips(year, month);
-        return trips.reduce((total, trip) => total + (parseFloat(trip.payment) || 0), 0);
+        console.log(`📊 Calculating monthly revenue for ${year}-${month}:`, trips.length, 'trips');
+        const revenue = trips.reduce((total, trip) => total + (parseFloat(trip.payment) || 0), 0);
+        console.log(`💰 Monthly revenue: ₹${revenue}`);
+        return revenue;
     }
 
     async getMonthlyProfit(year, month) {
         const trips = await this.getMonthlyTrips(year, month);
-        return trips.reduce((total, trip) => {
+        console.log(`📈 Calculating monthly profit for ${year}-${month}:`, trips.length, 'trips');
+        const profit = trips.reduce((total, trip) => {
             // Convert trip to JS format first
             const jsTrip = this.convertFromDbFormat(trip);
             const revenue = parseFloat(jsTrip.payment) || 0;
@@ -362,6 +366,8 @@ class DatabaseStorage {
             
             return total + (revenue - costs);
         }, 0);
+        console.log(`📊 Monthly profit: ₹${profit}`);
+        return profit;
     }
 
     async getMonthlyTrips(year, month) {

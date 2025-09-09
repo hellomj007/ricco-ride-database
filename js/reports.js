@@ -4,18 +4,43 @@ let vehicles = [];
 let companies = [];
 let drivers = [];
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadData();
+// Set up database ready listener BEFORE DOMContentLoaded
+window.addEventListener('databaseReady', async function() {
+    console.log('🔄 Database ready, loading reports data...');
+    await loadData();
     setupFilters();
-    loadReports();
     populateYearDropdown();
+    loadReports();
 });
 
-function loadData() {
-    allTrips = storage.getTrips();
-    vehicles = storage.getAll('vehicles');
-    companies = storage.getAll('companies');
-    drivers = storage.getAll('drivers');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM loaded, setting up reports...');
+    
+    // Try to load immediately if database is already ready
+    setTimeout(async () => {
+        if (typeof storage !== 'undefined' && storage.isReady) {
+            console.log('💡 Database already ready, loading data immediately');
+            await loadData();
+            setupFilters();
+            populateYearDropdown();
+            loadReports();
+        } else {
+            console.log('⏳ Database not ready yet, waiting for databaseReady event...');
+        }
+    }, 200);
+});
+
+async function loadData() {
+    try {
+        console.log('📋 Loading reports data...');
+        allTrips = await storage.getTrips();
+        vehicles = await storage.getAllAsync('vehicles');
+        companies = await storage.getAllAsync('companies');
+        drivers = await storage.getAllAsync('drivers');
+        console.log('✅ Reports data loaded successfully');
+    } catch (error) {
+        console.error('❌ Error loading reports data:', error);
+    }
 }
 
 function setupFilters() {
@@ -450,8 +475,16 @@ function populateYearDropdown() {
 }
 
 function loadMonthlyAnalysis() {
+    if (!allTrips || allTrips.length === 0) {
+        console.log('⚠️ No trips data available for monthly analysis');
+        document.getElementById('monthlyChart').innerHTML = '<p>No data available. Please ensure trips are loaded.</p>';
+        return;
+    }
+    
     const selectedYear = parseInt(document.getElementById('monthlyYear').value);
+    console.log(`📊 Loading monthly analysis for year ${selectedYear} with ${allTrips.length} total trips`);
     const yearTrips = allTrips.filter(trip => new Date(trip.date).getFullYear() === selectedYear);
+    console.log(`📊 Found ${yearTrips.length} trips for year ${selectedYear}`);
     
     const monthlyData = {};
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
@@ -464,8 +497,11 @@ function loadMonthlyAnalysis() {
     
     yearTrips.forEach(trip => {
         const month = new Date(trip.date).getMonth();
+        const payment = parseFloat(trip.payment) || 0;
         monthlyData[month].trips++;
-        monthlyData[month].revenue += parseFloat(trip.payment) || 0;
+        monthlyData[month].revenue += payment;
+        
+        console.log(`📅 Trip on ${trip.date} (month ${month}): Payment ₹${payment}`);
         
         let costs = 0;
         
@@ -600,12 +636,13 @@ function exportTripsToCSV() {
     URL.revokeObjectURL(url);
 }
 
-function viewTrip(tripId) {
-    const trip = storage.getById('trips', tripId);
-    if (!trip) {
-        alert('Trip not found!');
-        return;
-    }
+async function viewTrip(tripId) {
+    try {
+        const trip = await storage.getByIdAsync('trips', tripId);
+        if (!trip) {
+            alert('Trip not found!');
+            return;
+        }
 
     const vehicle = trip.vehicleId ? 
         vehicles.find(v => v.id === trip.vehicleId) :
@@ -700,10 +737,14 @@ function viewTrip(tripId) {
         `;
     }
 
-    document.getElementById('tripDetails').innerHTML = detailsHtml;
-    const modal = document.getElementById('tripModal');
-    modal.style.display = 'flex';
-    modal.classList.add('show');
+        document.getElementById('tripDetails').innerHTML = detailsHtml;
+        const modal = document.getElementById('tripModal');
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } catch (error) {
+        console.error('Error viewing trip in reports:', error);
+        alert('Error loading trip details: ' + error.message);
+    }
 }
 
 function closeTripModal() {
