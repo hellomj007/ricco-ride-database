@@ -3,7 +3,9 @@ import { resolve } from 'path'
 
 export default defineConfig({
   root: '.',
+  publicDir: 'public',
   build: {
+    outDir: 'dist',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
@@ -12,7 +14,9 @@ export default defineConfig({
         manageData: resolve(__dirname, 'manage-data.html'),
         reports: resolve(__dirname, 'reports.html')
       }
-    }
+    },
+    // Copy JS and CSS folders as-is to dist
+    copyPublicDir: true
   },
   server: {
     port: 3000,
