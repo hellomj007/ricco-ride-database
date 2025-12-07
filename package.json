@@ -1,0 +1,13 @@
+{
+  "name": "cab-service-accounts",
+  "version": "1.0.0",
+  "description": "RiccoRide - Cab Service Accounts Management",
+  "scripts": {
+    "dev": "npx vite",
+    "build": "npx vite build",
+    "preview": "npx vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}

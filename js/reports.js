@@ -198,17 +198,33 @@ function loadReports() {
 function updateSummaryStats(trips) {
     const totalTrips = trips.length;
     const totalRevenue = trips.reduce((sum, trip) => sum + (parseFloat(trip.payment) || 0), 0);
-    const totalDistance = trips.reduce((sum, trip) => sum + (parseFloat(trip.kilometre) || 0), 0);
-    
-    const totalCosts = trips.reduce((sum, trip) => {
-        const driverCost = parseFloat(trip.driverCost) || 0;
-        const fuelCost = parseFloat(trip.fuelCost) || 0;
-        const maintenance = parseFloat(trip.maintenance) || 0;
-        const tollParking = parseFloat(trip.tollParking) || 0;
-        return sum + driverCost + fuelCost + maintenance + tollParking;
+    // Exclude outsourced trips from distance (not our vehicles)
+    const totalDistance = trips.reduce((sum, trip) =>
+        trip.tripType !== 'Outsource' ? sum + (parseFloat(trip.kilometre) || 0) : sum, 0);
+
+    // Calculate profit per trip based on trip type
+    const totalProfit = trips.reduce((sum, trip) => {
+        const payment = parseFloat(trip.payment) || 0;
+        let costs = 0;
+
+        if (trip.tripType === 'Outsource') {
+            // Outsource: only vendor share + toll/parking
+            costs = (parseFloat(trip.vendorShare) || 0) + (parseFloat(trip.tollParking) || 0);
+        } else if (trip.tripType === 'Company') {
+            // Company: driver + fuel + maintenance (toll is reimbursed)
+            costs = (parseFloat(trip.driverCost) || 0) +
+                   (parseFloat(trip.fuelCost) || 0) +
+                   (parseFloat(trip.maintenance) || 0);
+        } else {
+            // Individual: all costs including toll
+            costs = (parseFloat(trip.driverCost) || 0) +
+                   (parseFloat(trip.fuelCost) || 0) +
+                   (parseFloat(trip.maintenance) || 0) +
+                   (parseFloat(trip.tollParking) || 0);
+        }
+
+        return sum + (payment - costs);
     }, 0);
-    
-    const totalProfit = totalRevenue - totalCosts;
     
     document.getElementById('totalTrips').textContent = totalTrips;
     document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString('en-IN')}`;
@@ -292,11 +308,21 @@ function loadVehiclePerformance(trips) {
         vehicleStats[vehicleKey].trips++;
         vehicleStats[vehicleKey].revenue += parseFloat(trip.payment) || 0;
         vehicleStats[vehicleKey].distance += parseFloat(trip.kilometre) || 0;
-        
-        const costs = (parseFloat(trip.driverCost) || 0) + 
-                     (parseFloat(trip.fuelCost) || 0) + 
-                     (parseFloat(trip.maintenance) || 0) + 
-                     (parseFloat(trip.tollParking) || 0);
+
+        // Calculate costs based on trip type
+        let costs = 0;
+        if (trip.tripType === 'Outsource') {
+            costs = (parseFloat(trip.vendorShare) || 0) + (parseFloat(trip.tollParking) || 0);
+        } else if (trip.tripType === 'Company') {
+            costs = (parseFloat(trip.driverCost) || 0) +
+                   (parseFloat(trip.fuelCost) || 0) +
+                   (parseFloat(trip.maintenance) || 0);
+        } else {
+            costs = (parseFloat(trip.driverCost) || 0) +
+                   (parseFloat(trip.fuelCost) || 0) +
+                   (parseFloat(trip.maintenance) || 0) +
+                   (parseFloat(trip.tollParking) || 0);
+        }
         vehicleStats[vehicleKey].costs += costs;
     });
     
@@ -360,11 +386,11 @@ function loadCompanyAnalysis(trips) {
         companyStats[companyName].trips++;
         companyStats[companyName].revenue += parseFloat(trip.payment) || 0;
         companyStats[companyName].distance += parseFloat(trip.kilometre) || 0;
-        
-        const costs = (parseFloat(trip.driverCost) || 0) + 
-                     (parseFloat(trip.fuelCost) || 0) + 
-                     (parseFloat(trip.maintenance) || 0) + 
-                     (parseFloat(trip.tollParking) || 0);
+
+        // Company trips: toll/parking is reimbursed, not a cost
+        const costs = (parseFloat(trip.driverCost) || 0) +
+                     (parseFloat(trip.fuelCost) || 0) +
+                     (parseFloat(trip.maintenance) || 0);
         companyStats[companyName].costs += costs;
     });
     
