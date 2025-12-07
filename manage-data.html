@@ -2,19 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RiccoRide - Manage Data</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#3B82F6">
+    <title>RiccoRide - Data</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🚗 RiccoRide - Manage Data</h1>
-            <nav>
+            <div class="header-top">
+                <a href="index.html" class="brand">
+                    <span class="brand-logo">🚗</span>
+                    <span class="brand-name">RiccoRide</span>
+                </a>
+                <div class="header-action">
+                    <a href="trip-entry.html" class="btn-add-trip">
+                        <span>+</span>
+                        <span>Add Trip</span>
+                    </a>
+                </div>
+            </div>
+            <nav class="desktop-nav">
                 <a href="index.html">Dashboard</a>
-                <a href="trip-entry.html" class="nav-action">+ Add Trip</a>
-                <a href="trips-list.html">Manage Trips</a>
-                <a href="manage-data.html" class="active">Manage Data</a>
+                <a href="trips-list.html">Trips</a>
+                <a href="manage-data.html" class="active">Data</a>
                 <a href="reports.html">Reports</a>
             </nav>
         </header>
@@ -237,9 +248,28 @@
             </div>
 
         </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="index.html">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </a>
+            <a href="trips-list.html">
+                <span class="nav-icon">📋</span>
+                <span>Trips</span>
+            </a>
+            <a href="manage-data.html" class="active">
+                <span class="nav-icon">⚙️</span>
+                <span>Data</span>
+            </a>
+            <a href="reports.html">
+                <span class="nav-icon">📊</span>
+                <span>Reports</span>
+            </a>
+        </nav>
     </div>
 
-    <!-- Edit Modal -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -248,10 +278,8 @@
         </div>
     </div>
 
-    <!-- Supabase Database (simplified) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/storage-database.js"></script>
-    
     <script src="js/manage-data.js"></script>
 </body>
 </html>
