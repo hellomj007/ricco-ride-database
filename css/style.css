@@ -110,6 +110,25 @@ nav a.active {
     border-color: var(--primary-color);
 }
 
+/* Add Trip - Primary Action Button in Nav */
+nav a.nav-action {
+    background: linear-gradient(135deg, var(--secondary-color), #059669);
+    color: white;
+    border-color: var(--secondary-color);
+    font-weight: 600;
+}
+
+nav a.nav-action:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+nav a.nav-action.active {
+    background: linear-gradient(135deg, var(--secondary-color), #059669);
+    border-color: var(--secondary-color);
+}
+
 /* Stats Grid */
 .stats-grid {
     display: grid;
