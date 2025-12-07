@@ -5,47 +5,60 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let supabase;
 
+console.log('🚀 Storage-database.js loaded');
+
 class DatabaseStorage {
     constructor() {
+        console.log('🔧 DatabaseStorage constructor called');
         this.isReady = false;
         this.initializeDatabase();
     }
 
     async initializeDatabase() {
+        console.log('🔄 initializeDatabase started');
         try {
             // Wait for Supabase library to be available
             let retries = 0;
             while (!window.supabase && retries < 50) {
-                console.log('⏳ Waiting for Supabase library...');
+                console.log('⏳ Waiting for Supabase library... attempt', retries + 1);
                 await new Promise(resolve => setTimeout(resolve, 100));
                 retries++;
             }
-            
+
             if (!window.supabase) {
+                console.error('❌ Supabase library never loaded from CDN');
                 throw new Error('Supabase library not available after waiting');
             }
-            
+
+            console.log('✅ Supabase library found on window object');
+
             // Initialize Supabase client
             if (!supabase) {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 console.log('✅ Supabase client initialized with direct config');
             }
-            
+
             // Test connection
+            console.log('🔄 Testing database connection...');
             const { data, error } = await supabase.from('trips').select('count', { count: 'exact', head: true });
-            if (error) throw error;
-            
+
+            if (error) {
+                console.error('❌ Connection test failed:', error);
+                throw error;
+            }
+
             this.isReady = true;
             console.log('✅ Database connected successfully');
-            
+
             // Check database schema
             await this.checkSchema();
-            
+
             // Seed initial data if tables are empty
             await this.seedInitialData();
         } catch (error) {
             console.error('❌ Database connection failed:', error);
-            alert('Database connection failed. Please check your internet connection and database setup.');
+            console.error('❌ Error details:', JSON.stringify(error, null, 2));
+            alert('Database connection failed: ' + (error.message || 'Unknown error'));
         }
     }
 

@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🚗 RiccoRide - Add Trip</h1>
+            <h1>RiccoRide</h1>
             <nav>
                 <a href="index.html">Dashboard</a>
                 <a href="trip-entry.html" class="active">Add Trip</a>
@@ -20,193 +20,281 @@
         </header>
 
         <main>
-            <div class="form-container">
+            <!-- Page Header -->
+            <div class="page-header">
                 <h2>Add New Trip</h2>
-                <form id="tripForm">
-                    <div class="form-grid">
-                        <!-- Basic Trip Details -->
-                        <div class="form-group">
-                            <label for="tripDate">Trip Date *</label>
-                            <input type="date" id="tripDate" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="tripType">Trip Type *</label>
-                            <select id="tripType" required onchange="handleTripTypeChange()">
-                                <option value="">Select Trip Type</option>
-                                <option value="Company">Company</option>
-                                <option value="Individual">RiccoRide</option>
-                                <option value="Outsource">Outsource</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="route">Route *</label>
-                            <input type="text" id="route" required placeholder="e.g., Mumbai to Pune">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="routeType">Route Type *</label>
-                            <select id="routeType" required>
-                                <option value="">Select Type</option>
-                                <option value="Local">Local</option>
-                                <option value="Outstation">Outstation</option>
-                            </select>
-                        </div>
-
-                        <!-- Vehicle Selection -->
-                        <div class="form-group" id="vehicleGroup">
-                            <label for="vehicleId">Vehicle *</label>
-                            <select id="vehicleId" required onchange="handleVehicleChange()">
-                                <option value="">Select Vehicle</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" id="manualVehicleGroup" style="display: none;">
-                            <label for="manualVehicle">Vehicle Details (Manual Entry) *</label>
-                            <input type="text" id="manualVehicle" placeholder="Enter vehicle details">
-                        </div>
-
-                        <!-- Driver Selection -->
-                        <div class="form-group">
-                            <label for="driverId">Driver *</label>
-                            <select id="driverId" required onchange="handleDriverSelection()">
-                                <option value="">Select Driver</option>
-                            </select>
-                        </div>
-
-                        <!-- Company Selection (shown only for Company trips) -->
-                        <div class="form-group" id="companyGroup" style="display: none;">
-                            <label for="companyId">Company *</label>
-                            <select id="companyId">
-                                <option value="">Select Company</option>
-                            </select>
-                        </div>
-
-                        <!-- Vendor Selection (shown only for Outsource trips) -->
-                        <div class="form-group" id="vendorGroup" style="display: none;">
-                            <label for="vendorName">Vendor Name *</label>
-                            <input type="text" id="vendorName" placeholder="Enter vendor name">
-                        </div>
-
-                        <!-- Client Information (shown only for RiccoRide trips) -->
-                        <div class="form-group" id="clientNameGroup" style="display: none;">
-                            <label for="clientName">Client Name *</label>
-                            <input type="text" id="clientName" placeholder="Enter client name">
-                        </div>
-
-                        <div class="form-group" id="clientPhoneGroup" style="display: none;">
-                            <label for="clientPhone">Client Phone</label>
-                            <input type="tel" id="clientPhone" placeholder="9876543210">
-                        </div>
-
-                        <!-- Distance and Fuel -->
-                        <div class="form-group">
-                            <label for="kilometre">Distance (KM) *</label>
-                            <input type="number" id="kilometre" required placeholder="0" min="0" step="0.1">
-                        </div>
-
-                        <div class="form-group" id="fuelCostGroup">
-                            <label for="fuelCost">Fuel Cost (₹) *</label>
-                            <input type="number" id="fuelCost" required placeholder="0" min="0" step="0.01">
-                        </div>
-
-                        <!-- Vendor Share (shown only for Outsource trips) -->
-                        <div class="form-group" id="vendorShareGroup" style="display: none;">
-                            <label for="vendorShare">Vendor Share (₹) *</label>
-                            <input type="number" id="vendorShare" placeholder="0" min="0" step="0.01">
-                        </div>
-
-                        <!-- Payment Details -->
-                        <div class="form-group">
-                            <label for="paymentMethod">Payment Method *</label>
-                            <select id="paymentMethod" required>
-                                <option value="">Select Payment Method</option>
-                                <option value="Online">Online</option>
-                                <option value="Cash">Cash</option>
-                                <option value="UPI">UPI</option>
-                                <option value="Card">Card</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="payment">Payment Amount (₹) *</label>
-                            <input type="number" id="payment" required placeholder="0" min="0" step="0.01">
-                        </div>
-
-                        <!-- Costs (hidden for Outsource) -->
-                        <div class="form-group" id="driverCostGroup">
-                            <label for="driverCost">Driver Cost (₹) *</label>
-                            <input type="number" id="driverCost" required placeholder="0" min="0" step="0.01">
-                        </div>
-
-                        <div class="form-group" id="maintenanceGroup">
-                            <label for="maintenance">Maintenance Cost (₹)</label>
-                            <input type="number" id="maintenance" placeholder="0" min="0" step="0.01" value="0">
-                        </div>
-
-                        <div class="form-group" id="maintenanceReasonGroup">
-                            <label for="maintenanceReason">Maintenance Reason</label>
-                            <input type="text" id="maintenanceReason" placeholder="Reason for maintenance cost">
-                        </div>
-
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label for="description">Trip Description</label>
-                            <textarea id="description" rows="3" placeholder="Additional notes about this trip (optional)"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Company Trip Specific Fields -->
-                    <div id="companyFields" style="display: none;">
-                        <h3>Company Trip Details</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="tollParking">Toll & Parking (₹)</label>
-                                <input type="number" id="tollParking" placeholder="0" min="0" step="0.01" value="0">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="startDateTime">Start Date & Time</label>
-                                <input type="datetime-local" id="startDateTime">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="endDateTime">End Date & Time</label>
-                                <input type="datetime-local" id="endDateTime" onchange="calculateTotalDays()">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="totalDays">Total Days</label>
-                                <input type="number" id="totalDays" readonly placeholder="Auto calculated" step="0.1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Save Trip</button>
-                            <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
-                            <button type="button" class="btn btn-info" onclick="calculateProfit()">Calculate Profit</button>
-                        </div>
-                    </div>
-
-                    <!-- Profit Display -->
-                    <div id="profitDisplay" style="display: none; margin-top: 20px; padding: 20px; background: #e7f3ff; border-radius: 5px;">
-                        <h3>Trip Calculation</h3>
-                        <div class="form-grid">
-                            <div><strong>Total Revenue:</strong> ₹<span id="totalRevenue">0</span></div>
-                            <div><strong>Total Costs:</strong> ₹<span id="totalCosts">0</span></div>
-                            <div><strong>Net Profit:</strong> ₹<span id="netProfit">0</span></div>
-                        </div>
-                    </div>
-                </form>
+                <p class="subtitle">Record a new trip and track your earnings</p>
             </div>
 
+            <form id="tripForm">
+                <!-- Step 1: Trip Type Selection -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <span class="section-icon">1</span>
+                        <h3>Select Trip Type</h3>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="trip-type-selector">
+                            <div class="trip-type-card" data-type="Company" onclick="selectTripType('Company')">
+                                <span class="icon">🏢</span>
+                                <span class="label">Company</span>
+                                <span class="desc">Corporate client trips</span>
+                            </div>
+                            <div class="trip-type-card" data-type="Individual" onclick="selectTripType('Individual')">
+                                <span class="icon">🚗</span>
+                                <span class="label">RiccoRide</span>
+                                <span class="desc">Direct customer trips</span>
+                            </div>
+                            <div class="trip-type-card" data-type="Outsource" onclick="selectTripType('Outsource')">
+                                <span class="icon">🤝</span>
+                                <span class="label">Outsource</span>
+                                <span class="desc">Third-party vehicle</span>
+                            </div>
+                        </div>
+                        <!-- Hidden select for form submission -->
+                        <select id="tripType" required style="display: none;" onchange="handleTripTypeChange()">
+                            <option value="">Select Trip Type</option>
+                            <option value="Company">Company</option>
+                            <option value="Individual">RiccoRide</option>
+                            <option value="Outsource">Outsource</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Two Column Layout -->
+                <div class="form-two-col">
+                    <!-- Left Column: Form Fields -->
+                    <div class="form-main">
+                        <!-- Section 2: Basic Details -->
+                        <div class="form-section">
+                            <div class="form-section-header">
+                                <span class="section-icon">2</span>
+                                <h3>Trip Details</h3>
+                            </div>
+                            <div class="form-section-body">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="tripDate">Trip Date *</label>
+                                        <input type="date" id="tripDate" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="route">Route *</label>
+                                        <input type="text" id="route" required placeholder="e.g., Mumbai to Pune">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="routeType">Route Type *</label>
+                                        <select id="routeType" required>
+                                            <option value="">Select Type</option>
+                                            <option value="Local">Local</option>
+                                            <option value="Outstation">Outstation</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="kilometre">Distance (KM) *</label>
+                                        <input type="number" id="kilometre" required placeholder="0" min="0" step="0.1" oninput="calculateProfit()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Assignment -->
+                        <div class="form-section">
+                            <div class="form-section-header">
+                                <span class="section-icon">3</span>
+                                <h3>Vehicle & Driver</h3>
+                            </div>
+                            <div class="form-section-body">
+                                <div class="form-grid">
+                                    <div class="form-group" id="vehicleGroup">
+                                        <label for="vehicleId">Vehicle *</label>
+                                        <select id="vehicleId" required onchange="handleVehicleChange()">
+                                            <option value="">Select Vehicle</option>
+                                        </select>
+                                        <button type="button" class="quick-add-btn" onclick="openQuickAddVehicleModal()">+ Add New Vehicle</button>
+                                    </div>
+
+                                    <div class="form-group" id="manualVehicleGroup" style="display: none;">
+                                        <label for="manualVehicle">Vehicle Details *</label>
+                                        <input type="text" id="manualVehicle" placeholder="Enter vehicle details">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="driverId">Driver *</label>
+                                        <select id="driverId" required onchange="handleDriverSelection()">
+                                            <option value="">Select Driver</option>
+                                        </select>
+                                        <button type="button" class="quick-add-btn" onclick="openQuickAddDriverModal()">+ Add New Driver</button>
+                                    </div>
+
+                                    <!-- Company Selection -->
+                                    <div class="form-group" id="companyGroup" style="display: none;">
+                                        <label for="companyId">Company *</label>
+                                        <select id="companyId">
+                                            <option value="">Select Company</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Vendor Name -->
+                                    <div class="form-group" id="vendorGroup" style="display: none;">
+                                        <label for="vendorName">Vendor Name *</label>
+                                        <input type="text" id="vendorName" placeholder="Enter vendor name">
+                                    </div>
+
+                                    <!-- Client Info -->
+                                    <div class="form-group" id="clientNameGroup" style="display: none;">
+                                        <label for="clientName">Client Name *</label>
+                                        <input type="text" id="clientName" placeholder="Enter client name">
+                                    </div>
+
+                                    <div class="form-group" id="clientPhoneGroup" style="display: none;">
+                                        <label for="clientPhone">Client Phone</label>
+                                        <input type="tel" id="clientPhone" placeholder="9876543210">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4: Financials -->
+                        <div class="form-section">
+                            <div class="form-section-header">
+                                <span class="section-icon">4</span>
+                                <h3>Payment & Costs</h3>
+                            </div>
+                            <div class="form-section-body">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="payment">Payment Received (₹) *</label>
+                                        <input type="number" id="payment" required placeholder="0" min="0" step="0.01" oninput="calculateProfit()">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="paymentMethod">Payment Method *</label>
+                                        <select id="paymentMethod" required>
+                                            <option value="">Select Method</option>
+                                            <option value="Cash">Cash</option>
+                                            <option value="UPI">UPI</option>
+                                            <option value="Online">Online Transfer</option>
+                                            <option value="Card">Card</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Vendor Share (Outsource only) -->
+                                    <div class="form-group" id="vendorShareGroup" style="display: none;">
+                                        <label for="vendorShare">Vendor Share (₹) *</label>
+                                        <input type="number" id="vendorShare" placeholder="0" min="0" step="0.01" oninput="calculateProfit()">
+                                    </div>
+
+                                    <!-- Own Vehicle Costs -->
+                                    <div class="form-group" id="driverCostGroup">
+                                        <label for="driverCost">Driver Cost (₹) *</label>
+                                        <input type="number" id="driverCost" required placeholder="0" min="0" step="0.01" oninput="calculateProfit()">
+                                    </div>
+
+                                    <div class="form-group" id="fuelCostGroup">
+                                        <label for="fuelCost">Fuel Cost (₹) *</label>
+                                        <input type="number" id="fuelCost" required placeholder="0" min="0" step="0.01" oninput="calculateProfit()">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="tollParking">Toll & Parking (₹)</label>
+                                        <input type="number" id="tollParking" placeholder="0" min="0" step="0.01" value="0" oninput="calculateProfit()">
+                                    </div>
+
+                                    <div class="form-group" id="maintenanceGroup">
+                                        <label for="maintenance">Maintenance (₹)</label>
+                                        <input type="number" id="maintenance" placeholder="0" min="0" step="0.01" value="0" oninput="calculateProfit()">
+                                    </div>
+
+                                    <div class="form-group" id="maintenanceReasonGroup">
+                                        <label for="maintenanceReason">Maintenance Reason</label>
+                                        <input type="text" id="maintenanceReason" placeholder="If any maintenance cost">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 5: Company Trip Details (conditional) -->
+                        <div id="companyFields" class="form-section" style="display: none;">
+                            <div class="form-section-header">
+                                <span class="section-icon">5</span>
+                                <h3>Company Trip Details</h3>
+                            </div>
+                            <div class="form-section-body">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="startDateTime">Start Date & Time</label>
+                                        <input type="datetime-local" id="startDateTime">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="endDateTime">End Date & Time</label>
+                                        <input type="datetime-local" id="endDateTime" onchange="calculateTotalDays()">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="totalDays">Total Days</label>
+                                        <input type="number" id="totalDays" readonly placeholder="Auto calculated" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes Section -->
+                        <div class="form-section">
+                            <div class="form-section-header">
+                                <span class="section-icon">📝</span>
+                                <h3>Additional Notes</h3>
+                            </div>
+                            <div class="form-section-body">
+                                <div class="form-group">
+                                    <textarea id="description" rows="3" placeholder="Any additional notes about this trip (optional)"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Profit Calculator (Sticky) -->
+                    <div class="form-sidebar">
+                        <div class="profit-calculator" id="profitDisplay">
+                            <h3>💰 Trip Summary</h3>
+                            <div class="calc-row">
+                                <span class="calc-label">Revenue</span>
+                                <span class="calc-value">₹<span id="totalRevenue">0</span></span>
+                            </div>
+                            <div class="calc-row">
+                                <span class="calc-label">Total Costs</span>
+                                <span class="calc-value">₹<span id="totalCosts">0</span></span>
+                            </div>
+                            <div class="calc-row profit" id="profitRow">
+                                <span class="calc-label">Net Profit</span>
+                                <span class="calc-value">₹<span id="netProfit">0</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-success btn-submit-large">
+                            Save Trip
+                        </button>
+
+                        <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: var(--spacing-sm);" onclick="clearForm()">
+                            Clear Form
+                        </button>
+                    </div>
+                </div>
+            </form>
+
             <!-- Recent Trips -->
-            <div class="form-container">
+            <div class="form-container" style="margin-top: var(--spacing-xl);">
                 <h2>Recent Trips</h2>
-                <div id="recentTrips"></div>
+                <div id="recentTrips">
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>No trips recorded yet</p>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -306,7 +394,24 @@
     <!-- Supabase Database (simplified) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/storage-database.js"></script>
-    
+
     <script src="js/trip-entry.js"></script>
+
+    <!-- Trip Type Selection Script -->
+    <script>
+        function selectTripType(type) {
+            // Update hidden select
+            document.getElementById('tripType').value = type;
+
+            // Update visual cards
+            document.querySelectorAll('.trip-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`.trip-type-card[data-type="${type}"]`).classList.add('selected');
+
+            // Trigger the original handler
+            handleTripTypeChange();
+        }
+    </script>
 </body>
 </html>

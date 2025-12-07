@@ -329,7 +329,17 @@ function calculateProfit() {
     document.getElementById('totalRevenue').textContent = payment.toLocaleString('en-IN');
     document.getElementById('totalCosts').textContent = totalCosts.toLocaleString('en-IN');
     document.getElementById('netProfit').textContent = netProfit.toLocaleString('en-IN');
-    
+
+    // Update profit row styling (green for profit, red for loss)
+    const profitRow = document.getElementById('profitRow');
+    if (profitRow) {
+        if (netProfit < 0) {
+            profitRow.classList.add('negative');
+        } else {
+            profitRow.classList.remove('negative');
+        }
+    }
+
     document.getElementById('profitDisplay').style.display = 'block';
 }
 

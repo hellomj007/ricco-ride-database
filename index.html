@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🚗 RiccoRide Dashboard</h1>
+            <h1>RiccoRide</h1>
             <nav>
                 <a href="index.html" class="active">Dashboard</a>
                 <a href="trip-entry.html">Add Trip</a>
@@ -20,39 +20,55 @@
         </header>
 
         <main>
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <p class="subtitle">Overview of your cab service business</p>
+            </div>
+
+            <!-- Stats Grid -->
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card info">
+                    <div class="stat-icon">🚗</div>
                     <h3>Today's Trips</h3>
                     <div class="stat-value" id="todaysTrips">0</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card highlight">
+                    <div class="stat-icon">💰</div>
                     <h3>This Month Revenue</h3>
                     <div class="stat-value" id="monthRevenue">₹0</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card success">
+                    <div class="stat-icon">📈</div>
                     <h3>This Month Profit</h3>
                     <div class="stat-value" id="monthProfit">₹0</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card warning">
+                    <div class="stat-icon">🚙</div>
                     <h3>Active Vehicles</h3>
                     <div class="stat-value" id="activeVehicles">0</div>
                 </div>
             </div>
 
+            <!-- Dashboard Content -->
             <div class="dashboard-content">
                 <div class="recent-trips">
                     <h2>Recent Trips</h2>
                     <div class="trips-list" id="recentTripsList">
-                        <p>No trips recorded yet. <a href="trip-entry.html">Add your first trip</a></p>
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <p>No trips recorded yet</p>
+                            <a href="trip-entry.html" class="btn btn-primary">Add Your First Trip</a>
+                        </div>
                     </div>
                 </div>
 
                 <div class="quick-actions">
                     <h2>Quick Actions</h2>
                     <div class="action-buttons">
-                        <a href="trip-entry.html" class="btn btn-primary">Add New Trip</a>
-                        <a href="manage-data.html" class="btn btn-secondary">Add Vehicle</a>
-                        <a href="manage-data.html" class="btn btn-secondary">Add Driver</a>
+                        <a href="trip-entry.html" class="btn btn-primary">+ Add New Trip</a>
+                        <a href="manage-data.html" class="btn btn-secondary">+ Add Vehicle</a>
+                        <a href="manage-data.html" class="btn btn-secondary">+ Add Driver</a>
                         <a href="reports.html" class="btn btn-info">View Reports</a>
                     </div>
                 </div>
@@ -72,7 +88,7 @@
     <!-- Supabase Database (simplified) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/storage-database.js"></script>
-    
+
     <script src="js/dashboard.js"></script>
 </body>
 </html>
