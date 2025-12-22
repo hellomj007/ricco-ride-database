@@ -3,7 +3,12 @@
 const SUPABASE_URL = 'https://fvjrckdblidfrjgfihnw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2anJja2RibGlkZnJqZ2ZpaG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0MjI4MTIsImV4cCI6MjA3Mjk5ODgxMn0.uO9ujXUf_2RPPhQ-ncM8uHiJarE8w_lrct2s4E7UW1E';
 
-let supabase;
+// Use window to prevent Vite HMR redeclaration errors
+if (!window._supabaseClient) {
+    window._supabaseClient = null;
+}
+const getSupabase = () => window._supabaseClient;
+const setSupabase = (client) => { window._supabaseClient = client; };
 
 console.log('🚀 Storage-database.js loaded');
 
@@ -11,6 +16,10 @@ class DatabaseStorage {
     constructor() {
         console.log('🔧 DatabaseStorage constructor called');
         this.isReady = false;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 5;
+        this.reconnectDelay = 2000; // Start with 2 seconds
+        this.healthCheckInterval = null;
         this.initializeDatabase();
     }
 
@@ -33,14 +42,14 @@ class DatabaseStorage {
             console.log('✅ Supabase library found on window object');
 
             // Initialize Supabase client
-            if (!supabase) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            if (!getSupabase()) {
+                setSupabase(window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
                 console.log('✅ Supabase client initialized with direct config');
             }
 
             // Test connection
             console.log('🔄 Testing database connection...');
-            const { data, error } = await supabase.from('trips').select('count', { count: 'exact', head: true });
+            const { error } = await getSupabase().from('trips').select('*', { count: 'exact', head: true });
 
             if (error) {
                 console.error('❌ Connection test failed:', error);
@@ -48,7 +57,11 @@ class DatabaseStorage {
             }
 
             this.isReady = true;
+            this.reconnectAttempts = 0; // Reset on successful connection
             console.log('✅ Database connected successfully');
+
+            // Start health check
+            this.startHealthCheck();
 
             // Check database schema
             await this.checkSchema();
@@ -58,14 +71,101 @@ class DatabaseStorage {
         } catch (error) {
             console.error('❌ Database connection failed:', error);
             console.error('❌ Error details:', JSON.stringify(error, null, 2));
-            alert('Database connection failed: ' + (error.message || 'Unknown error'));
+            this.isReady = false;
+            this.scheduleReconnect();
+        }
+    }
+
+    // Health check to detect dropped connections
+    startHealthCheck() {
+        // Clear any existing interval
+        if (this.healthCheckInterval) {
+            clearInterval(this.healthCheckInterval);
+        }
+
+        // Check connection every 30 seconds
+        this.healthCheckInterval = setInterval(async () => {
+            if (!this.isReady) return;
+
+            try {
+                const { error } = await getSupabase().from('trips').select('*', { count: 'exact', head: true });
+                if (error) {
+                    console.warn('⚠️ Health check failed:', error.message);
+                    this.handleConnectionLost();
+                }
+            } catch (error) {
+                console.warn('⚠️ Health check error:', error.message);
+                this.handleConnectionLost();
+            }
+        }, 30000);
+
+        console.log('🔄 Health check started (every 30s)');
+    }
+
+    handleConnectionLost() {
+        console.error('❌ Connection lost, attempting to reconnect...');
+        this.isReady = false;
+
+        // Clear health check while reconnecting
+        if (this.healthCheckInterval) {
+            clearInterval(this.healthCheckInterval);
+            this.healthCheckInterval = null;
+        }
+
+        this.scheduleReconnect();
+    }
+
+    scheduleReconnect() {
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            console.error('❌ Max reconnection attempts reached. Please refresh the page.');
+            alert('Database connection lost. Please refresh the page to reconnect.');
+            return;
+        }
+
+        this.reconnectAttempts++;
+        // Exponential backoff: 2s, 4s, 8s, 16s, 32s
+        const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+
+        console.log(`🔄 Reconnect attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay/1000}s...`);
+
+        setTimeout(() => {
+            this.reconnect();
+        }, delay);
+    }
+
+    async reconnect() {
+        console.log('🔄 Attempting to reconnect...');
+
+        try {
+            // Re-create Supabase client
+            setSupabase(window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
+
+            // Test connection
+            const { error } = await getSupabase().from('trips').select('*', { count: 'exact', head: true });
+
+            if (error) {
+                throw error;
+            }
+
+            this.isReady = true;
+            this.reconnectAttempts = 0;
+            console.log('✅ Reconnected successfully!');
+
+            // Restart health check
+            this.startHealthCheck();
+
+            // Notify app of reconnection
+            window.dispatchEvent(new CustomEvent('databaseReconnected'));
+        } catch (error) {
+            console.error('❌ Reconnection failed:', error.message);
+            this.scheduleReconnect();
         }
     }
 
     async checkSchema() {
         try {
             // Test if drivers table has status column
-            const { data, error } = await supabase.from('drivers').select('status').limit(0);
+            const { data, error } = await getSupabase().from('drivers').select('status').limit(0);
             if (error && error.message.includes('status')) {
                 console.error('❌ Missing status column in drivers table. Please run the SQL schema update.');
                 alert('Database schema needs updating. Please check the console and run the SQL commands in Supabase.');
@@ -114,26 +214,43 @@ class DatabaseStorage {
         }
     }
 
-    // Generic get all function
-    async getAll(table) {
+    // Generic get all function with retry
+    async getAll(table, retryCount = 0) {
         if (!this.isReady) {
             console.warn('Database not ready yet');
+            // Wait a bit and retry once if database is reconnecting
+            if (retryCount < 2) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (this.isReady) {
+                    return this.getAll(table, retryCount + 1);
+                }
+            }
             return [];
         }
-        
-        const { data, error } = await supabase.from(table).select('*').order('created_at', { ascending: false });
-        if (error) {
-            console.error(`Error fetching ${table}:`, error);
+
+        try {
+            const { data, error } = await getSupabase().from(table).select('*').order('created_at', { ascending: false });
+            if (error) {
+                console.error(`Error fetching ${table}:`, error);
+                // Check if it's a connection error
+                if (error.message?.includes('network') || error.message?.includes('fetch') || error.code === 'PGRST301') {
+                    this.handleConnectionLost();
+                }
+                return [];
+            }
+            return data || [];
+        } catch (error) {
+            console.error(`Exception fetching ${table}:`, error);
+            this.handleConnectionLost();
             return [];
         }
-        return data || [];
     }
 
     // Generic get by ID function
     async getById(table, id) {
         if (!this.isReady) return null;
         
-        const { data, error } = await supabase.from(table).select('*').eq('id', id).single();
+        const { data, error } = await getSupabase().from(table).select('*').eq('id', id).single();
         if (error) {
             console.error(`Error fetching ${table} by id:`, error);
             return null;
@@ -141,46 +258,59 @@ class DatabaseStorage {
         return data;
     }
 
-    // Generic save function (insert or update)
+    // Generic save function (insert or update) with connection error handling
     async save(table, item) {
         if (!this.isReady) {
             console.warn('Database not ready yet');
-            return null;
+            // Wait briefly in case we're reconnecting
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (!this.isReady) {
+                alert('Database not connected. Please wait and try again.');
+                return null;
+            }
         }
-        
+
         console.log(`🔥 SAVING TO ${table}:`, item);
-        console.log('🔥 Item keys:', Object.keys(item));
-        console.log('🔥 Looking for companyId:', item.companyId);
-        console.log('🔥 Looking for company_id:', item.company_id);
-        
-        let result;
-        if (item.id) {
-            // Update existing
-            const { data, error } = await supabase.from(table).update(item).eq('id', item.id).select().single();
-            result = { data, error };
-        } else {
-            // Insert new
-            const { data, error } = await supabase.from(table).insert([item]).select().single();
-            result = { data, error };
-        }
-        
-        if (result.error) {
-            console.error(`Error saving ${table}:`, result.error);
-            console.error('Full error details:', JSON.stringify(result.error, null, 2));
-            console.error('🔥 ITEM THAT FAILED:', item);
-            alert(`Error saving data: ${result.error.message || 'Unknown error'}`);
+
+        try {
+            let result;
+            if (item.id) {
+                // Update existing
+                const { data, error } = await getSupabase().from(table).update(item).eq('id', item.id).select().single();
+                result = { data, error };
+            } else {
+                // Insert new
+                const { data, error } = await getSupabase().from(table).insert([item]).select().single();
+                result = { data, error };
+            }
+
+            if (result.error) {
+                console.error(`Error saving ${table}:`, result.error);
+                // Check if it's a connection error
+                if (result.error.message?.includes('network') || result.error.message?.includes('fetch')) {
+                    this.handleConnectionLost();
+                    alert('Connection lost. Attempting to reconnect...');
+                } else {
+                    alert(`Error saving data: ${result.error.message || 'Unknown error'}`);
+                }
+                return null;
+            }
+
+            console.log(`✅ Saved to ${table}:`, result.data);
+            return result.data;
+        } catch (error) {
+            console.error(`Exception saving to ${table}:`, error);
+            this.handleConnectionLost();
+            alert('Connection error. Attempting to reconnect...');
             return null;
         }
-        
-        console.log(`✅ Saved to ${table}:`, result.data);
-        return result.data;
     }
 
     // Generic delete function
     async delete(table, id) {
         if (!this.isReady) return false;
         
-        const { error } = await supabase.from(table).delete().eq('id', id);
+        const { error } = await getSupabase().from(table).delete().eq('id', id);
         if (error) {
             console.error(`Error deleting from ${table}:`, error);
             alert(`Error deleting: ${error.message}`);
@@ -313,7 +443,7 @@ class DatabaseStorage {
 
     async getTodaysTrips() {
         const today = new Date().toISOString().split('T')[0];
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('trips')
             .select('*')
             .eq('date', today);
@@ -388,7 +518,7 @@ class DatabaseStorage {
         // Get last day of month properly (handles Feb, months with 30/31 days)
         const endDate = new Date(year, month, 0).toISOString().split('T')[0];
         
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('trips')
             .select('*')
             .gte('date', startDate)
@@ -424,16 +554,16 @@ class DatabaseStorage {
     }
 
     async getActiveVehiclesCount() {
-        const { data, error } = await supabase
+        const { count, error } = await getSupabase()
             .from('vehicles')
-            .select('count', { count: 'exact', head: true })
+            .select('*', { count: 'exact', head: true })
             .eq('status', 'Active');
-            
+
         if (error) {
             console.error('Error counting vehicles:', error);
             return 0;
         }
-        return data?.length || 0;
+        return count || 0;
     }
 
     // Backward compatibility methods
@@ -519,4 +649,40 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('❌ Database initialization failed');
         alert('Database connection failed. Please refresh the page.');
     }
+});
+
+// Handle visibility change - check connection when tab becomes visible again
+document.addEventListener('visibilitychange', async function() {
+    if (document.visibilityState === 'visible') {
+        console.log('👁️ Tab became visible, checking database connection...');
+        if (databaseStorage.isReady) {
+            // Quick health check
+            try {
+                const { error } = await getSupabase().from('trips').select('*', { count: 'exact', head: true });
+                if (error) {
+                    console.warn('⚠️ Connection stale after tab switch, reconnecting...');
+                    databaseStorage.handleConnectionLost();
+                } else {
+                    console.log('✅ Connection still active');
+                }
+            } catch (error) {
+                console.warn('⚠️ Connection error after tab switch:', error.message);
+                databaseStorage.handleConnectionLost();
+            }
+        }
+    }
+});
+
+// Handle online/offline events
+window.addEventListener('online', function() {
+    console.log('🌐 Network back online, checking connection...');
+    if (!databaseStorage.isReady) {
+        databaseStorage.reconnectAttempts = 0; // Reset attempts
+        databaseStorage.reconnect();
+    }
+});
+
+window.addEventListener('offline', function() {
+    console.log('📴 Network offline');
+    databaseStorage.isReady = false;
 });

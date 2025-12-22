@@ -5,7 +5,10 @@
       "Bash(git commit:*)",
       "Bash(git config:*)",
       "Bash(git push:*)",
-      "Bash(npx create-next-app:*)"
+      "Bash(npx create-next-app:*)",
+      "Bash(node --check:*)",
+      "Bash(npx acorn:*)",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []
